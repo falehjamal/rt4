@@ -37,11 +37,6 @@ export function NavMain({ groups }: { groups: NavGroup[] }) {
                                         <Link href={item.href} prefetch>
                                             {item.icon && <item.icon />}
                                             <span>{item.title}</span>
-                                            {active && (
-                                                <span className="bg-brand-500 ml-auto rounded-full px-1.5 py-0.5 text-[10px] font-semibold text-white group-data-[collapsible=icon]:hidden">
-                                                    Aktif
-                                                </span>
-                                            )}
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>

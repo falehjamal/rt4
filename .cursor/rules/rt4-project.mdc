@@ -1,3 +1,16 @@
 ---
 alwaysApply: true
 ---
+---
+description: RT4 adalah aplikasi SPA berbasis Laravel 13.17 dan Inertia.js dengan React. Wajib gunakan modul/component yang sudah ada untuk UI, atau template dari public/template.
+globs: resources/js/**/*.{ts,tsx},app/Http/**/*.php,public/template/**
+alwaysApply: true
+---
+
+# RT4 SPA Project
+
+- Aplikasi ini adalah SPA RT4 dengan Laravel 13.17 dan Inertia.js (React).
+- Jika membuat/menambah tampilan UI:
+  - Utamakan reuse modul/component yang sudah ada.
+  - Bila butuh layout baru, cek referensi dan template di `public/template/`.
+- Ikuti standar dan struktur yang ada dalam aplikasi sebelum membuat pola/struktur baru.

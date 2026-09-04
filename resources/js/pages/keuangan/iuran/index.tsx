@@ -1,5 +1,12 @@
 import { Form, Head, Link, router } from '@inertiajs/react';
-import { ArrowUpDown, Pencil, Plus, Trash2 } from 'lucide-react';
+import {
+    ArrowUpDown,
+    ChevronDown,
+    Eye,
+    Pencil,
+    Plus,
+    Trash2,
+} from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
@@ -11,6 +18,12 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
@@ -76,6 +89,7 @@ export default function IuranIndex({
 }) {
     const [open, setOpen] = useState(false);
     const [editing, setEditing] = useState<IuranRow | null>(null);
+    const [detail, setDetail] = useState<IuranRow | null>(null);
 
     function openCreate(): void {
         setEditing(null);
@@ -83,8 +97,13 @@ export default function IuranIndex({
     }
 
     function openEdit(row: IuranRow): void {
+        setDetail(null);
         setEditing(row);
         setOpen(true);
+    }
+
+    function openDetail(row: IuranRow): void {
+        setDetail(row);
     }
 
     function sortHref(column: string): string {
@@ -126,8 +145,7 @@ export default function IuranIndex({
                                 Iuran Member
                             </h1>
                             <p className="mt-1 text-sm text-gray-500">
-                                Iuran warga (admin bisa jadi member). Superadmin
-                                bukan member.
+                                Iuran warga/member untuk agustusan tahun depan.
                             </p>
                         </div>
 
@@ -176,6 +194,9 @@ export default function IuranIndex({
                         <table className="w-full min-w-[860px] text-left text-sm">
                             <thead>
                                 <tr className="border-b border-gray-100">
+                                    <th className="text-horizon-gray w-16 pb-3 font-medium">
+                                        Aksi
+                                    </th>
                                     {(
                                         [
                                             ['id', 'ID'],
@@ -211,18 +232,13 @@ export default function IuranIndex({
                                     <th className="text-horizon-gray pb-3 font-medium">
                                         Bukti
                                     </th>
-                                    {canManage && (
-                                        <th className="text-horizon-gray pb-3 font-medium">
-                                            Aksi
-                                        </th>
-                                    )}
                                 </tr>
                             </thead>
                             <tbody>
                                 {iurans.data.length === 0 ? (
                                     <tr>
                                         <td
-                                            colSpan={canManage ? 7 : 6}
+                                            colSpan={7}
                                             className="text-horizon-gray py-10 text-center"
                                         >
                                             Belum ada data iuran.
@@ -234,6 +250,62 @@ export default function IuranIndex({
                                             key={row.id}
                                             className="text-navy-700 border-b border-gray-50 last:border-0"
                                         >
+                                            <td className="py-3">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger
+                                                        asChild
+                                                    >
+                                                        <Button
+                                                            type="button"
+                                                            size="icon"
+                                                            variant="outline"
+                                                            className="size-8"
+                                                        >
+                                                            <ChevronDown className="size-4" />
+                                                            <span className="sr-only">
+                                                                Aksi
+                                                            </span>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="start">
+                                                        <DropdownMenuItem
+                                                            className="text-sky-600 focus:bg-sky-50 focus:text-sky-700 [&_svg]:text-sky-600"
+                                                            onClick={() =>
+                                                                openDetail(row)
+                                                            }
+                                                        >
+                                                            <Eye />
+                                                            Detail
+                                                        </DropdownMenuItem>
+                                                        {canManage && (
+                                                            <>
+                                                                <DropdownMenuItem
+                                                                    className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 [&_svg]:text-amber-600"
+                                                                    onClick={() =>
+                                                                        openEdit(
+                                                                            row,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Pencil />
+                                                                    Edit
+                                                                </DropdownMenuItem>
+                                                                <DropdownMenuItem
+                                                                    className="text-red-600 focus:bg-red-50 focus:text-red-700 [&_svg]:text-red-600"
+                                                                    onClick={() =>
+                                                                        deleteIuran(
+                                                                            row,
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <Trash2 />
+                                                                    Hapus
+                                                                </DropdownMenuItem>
+                                                            </>
+                                                        )}
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </td>
                                             <td className="py-3 font-semibold">
                                                 {row.id}
                                             </td>
@@ -268,34 +340,6 @@ export default function IuranIndex({
                                                     '-'
                                                 )}
                                             </td>
-                                            {canManage && (
-                                                <td className="py-3">
-                                                    <div className="flex gap-2">
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="outline"
-                                                            onClick={() =>
-                                                                openEdit(row)
-                                                            }
-                                                        >
-                                                            <Pencil className="size-3.5" />
-                                                            Edit
-                                                        </Button>
-                                                        <Button
-                                                            type="button"
-                                                            size="sm"
-                                                            variant="destructive"
-                                                            onClick={() =>
-                                                                deleteIuran(row)
-                                                            }
-                                                        >
-                                                            <Trash2 className="size-3.5" />
-                                                            Hapus
-                                                        </Button>
-                                                    </div>
-                                                </td>
-                                            )}
                                         </tr>
                                     ))
                                 )}
@@ -339,6 +383,75 @@ export default function IuranIndex({
                     </div>
                 </div>
             </div>
+
+            <Dialog
+                open={detail !== null}
+                onOpenChange={(nextOpen) => {
+                    if (!nextOpen) {
+                        setDetail(null);
+                    }
+                }}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Detail iuran</DialogTitle>
+                        <DialogDescription>
+                            Ringkasan data iuran member.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {detail && (
+                        <dl className="grid gap-3 text-sm">
+                            <div>
+                                <dt className="text-horizon-gray">Member</dt>
+                                <dd className="text-navy-700 font-semibold">
+                                    {detail.member.name} (@
+                                    {detail.member.username})
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-horizon-gray">Nominal</dt>
+                                <dd className="text-navy-700 font-semibold">
+                                    {formatRupiah(detail.nominal)}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-horizon-gray">
+                                    Tanggal iuran
+                                </dt>
+                                <dd className="text-navy-700">
+                                    {detail.tanggal_iuran_label}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-horizon-gray">
+                                    Keterangan
+                                </dt>
+                                <dd className="text-navy-700">
+                                    {detail.keterangan ?? '-'}
+                                </dd>
+                            </div>
+                            <div>
+                                <dt className="text-horizon-gray">Bukti</dt>
+                                <dd>
+                                    {detail.bukti_url ? (
+                                        <a
+                                            href={detail.bukti_url}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="text-brand-500 font-medium hover:underline"
+                                        >
+                                            Lihat bukti
+                                        </a>
+                                    ) : (
+                                        '-'
+                                    )}
+                                </dd>
+                            </div>
+                        </dl>
+                    )}
+                </DialogContent>
+            </Dialog>
 
             {canManage && (
                 <Dialog
