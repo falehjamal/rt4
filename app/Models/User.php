@@ -64,9 +64,19 @@ class User extends Authenticatable implements PasskeyUser
         return $this->hasMany(Iuran::class);
     }
 
-    public function canManageIuran(): bool
+    public function hasFullAccess(): bool
     {
-        return $this->role->canManageIuran();
+        return $this->role->hasFullAccess();
+    }
+
+    public function isMember(): bool
+    {
+        return $this->role->isMember();
+    }
+
+    public function canManage(): bool
+    {
+        return $this->role->canManage();
     }
 
     /**
@@ -74,8 +84,8 @@ class User extends Authenticatable implements PasskeyUser
      * @return Builder<User>
      */
     #[Scope]
-    protected function payableMembers(Builder $query): Builder
+    protected function members(Builder $query): Builder
     {
-        return $query->whereIn('role', UserRole::payableValues());
+        return $query->whereIn('role', UserRole::memberValues());
     }
 }

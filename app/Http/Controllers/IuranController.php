@@ -38,7 +38,7 @@ class IuranController extends Controller
 
         $iurans = Iuran::query()
             ->with('user:id,name,username')
-            ->when(! $user->canManageIuran(), fn ($query) => $query->where('user_id', $user->id))
+            ->when(! $user->canManage(), fn ($query) => $query->where('user_id', $user->id))
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($inner) use ($search): void {
                     $inner->where('keterangan', 'like', "%{$search}%")
@@ -69,9 +69,9 @@ class IuranController extends Controller
                 'updated_at' => $iuran->updated_at?->format('d M Y H:i'),
             ]);
 
-        $members = $user->canManageIuran()
+        $members = $user->canManage()
             ? User::query()
-                ->payableMembers()
+                ->members()
                 ->orderBy('name')
                 ->orderBy('id')
                 ->get(['id', 'name', 'username'])
@@ -85,7 +85,7 @@ class IuranController extends Controller
                 'sort' => array_key_exists($sort, $sortable) ? $sort : 'tanggal_iuran',
                 'direction' => $direction,
             ],
-            'canManage' => $user->canManageIuran(),
+            'canManage' => $user->canManage(),
         ]);
     }
 

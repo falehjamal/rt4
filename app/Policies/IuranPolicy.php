@@ -20,7 +20,7 @@ class IuranPolicy
      */
     public function view(User $user, Iuran $iuran): bool
     {
-        return $user->canManageIuran() || $iuran->user_id === $user->id;
+        return $user->canManage() || $iuran->user_id === $user->id;
     }
 
     /**
@@ -28,7 +28,7 @@ class IuranPolicy
      */
     public function create(User $user): bool
     {
-        return $user->canManageIuran();
+        return $user->canManage();
     }
 
     /**
@@ -36,7 +36,7 @@ class IuranPolicy
      */
     public function update(User $user, Iuran $iuran): bool
     {
-        return $user->canManageIuran();
+        return $user->canManage();
     }
 
     /**
@@ -44,6 +44,6 @@ class IuranPolicy
      */
     public function delete(User $user, Iuran $iuran): bool
     {
-        return $user->canManageIuran();
+        return $user->canManage();
     }
 }

@@ -31,7 +31,7 @@ class UpdateIuranRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('users', 'id')->where(
-                    fn ($query) => $query->whereIn('role', UserRole::payableValues()),
+                    fn ($query) => $query->whereIn('role', UserRole::memberValues()),
                 ),
             ],
             'nominal' => ['required', 'numeric', 'min:0'],

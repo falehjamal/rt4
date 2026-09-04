@@ -15,21 +15,26 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as iuranIndex } from '@/routes/keuangan/iuran';
-import type { NavItem } from '@/types';
+import type { NavGroup, NavItem } from '@/types';
 
-const mainNavItems: NavItem[] = [
+const mainNavGroups: NavGroup[] = [
     {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
+        title: 'Menu Utama',
+        items: [
+            {
+                title: 'Dashboard',
+                href: dashboard(),
+                icon: LayoutGrid,
+            },
+        ],
     },
     {
-        title: 'Keuangan',
-        icon: Wallet,
-        children: [
+        title: 'Keuangan & Kas',
+        items: [
             {
                 title: 'Iuran Member',
                 href: iuranIndex(),
+                icon: Wallet,
             },
         ],
     },
@@ -53,7 +58,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain items={mainNavItems} />
+                <NavMain groups={mainNavGroups} />
             </SidebarContent>
 
             <SidebarFooter>

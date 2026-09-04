@@ -26,11 +26,11 @@ class IuranFactory extends Factory
         ];
     }
 
-    public function forPayableMember(): static
+    public function forMember(): static
     {
         return $this->state(fn (array $attributes) => [
             'user_id' => User::factory()->state([
-                'role' => fake()->randomElement(UserRole::payableRoles()),
+                'role' => fake()->randomElement(UserRole::memberRoles()),
             ]),
         ]);
     }

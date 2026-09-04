@@ -1,0 +1,13 @@
+---
+description: Model peran RT 4 — superadmin, admin, member
+globs: app/Enums/UserRole.php,app/Models/User.php,app/Policies/**/*.php,app/Http/**/*.php,resources/js/**/*.{ts,tsx}
+alwaysApply: false
+---
+
+# Peran pengguna
+
+- `superadmin` bukan orang/member. Tidak muncul di dropdown member, tidak punya iuran. Kuasa penuh atas semua fitur.
+- `admin` bisa jadi member (boleh punya iuran) dan boleh kelola data.
+- `member` adalah member: hanya data miliknya, tanpa mutasi kecuali diizinkan belakangan.
+
+Pakai helper enum/model: `hasFullAccess()`, `isMember()`, `canManage()`, scope `User::members()`.

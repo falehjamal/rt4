@@ -8,7 +8,26 @@ enum UserRole: string
     case Admin = 'admin';
     case Member = 'member';
 
-    public function canManageIuran(): bool
+    /**
+     * Superadmin bukan orang/member; punya kuasa penuh.
+     */
+    public function hasFullAccess(): bool
+    {
+        return $this === self::Superadmin;
+    }
+
+    /**
+     * Admin bisa jadi member; member adalah member. Superadmin tidak termasuk.
+     */
+    public function isMember(): bool
+    {
+        return $this === self::Admin || $this === self::Member;
+    }
+
+    /**
+     * Superadmin dan admin boleh kelola data.
+     */
+    public function canManage(): bool
     {
         return $this === self::Superadmin || $this === self::Admin;
     }
@@ -16,7 +35,7 @@ enum UserRole: string
     /**
      * @return list<self>
      */
-    public static function payableRoles(): array
+    public static function memberRoles(): array
     {
         return [self::Admin, self::Member];
     }
@@ -24,8 +43,8 @@ enum UserRole: string
     /**
      * @return list<string>
      */
-    public static function payableValues(): array
+    public static function memberValues(): array
     {
-        return array_map(fn (self $role): string => $role->value, self::payableRoles());
+        return array_map(fn (self $role): string => $role->value, self::memberRoles());
     }
 }

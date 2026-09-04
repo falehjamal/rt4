@@ -126,7 +126,8 @@ export default function IuranIndex({
                                 Iuran Member
                             </h1>
                             <p className="mt-1 text-sm text-gray-500">
-                                Catatan iuran warga role admin dan member.
+                                Iuran warga (admin bisa jadi member). Superadmin
+                                bukan member.
                             </p>
                         </div>
 

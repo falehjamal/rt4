@@ -1,5 +1,17 @@
 export type UserRole = 'superadmin' | 'admin' | 'member';
 
+export function hasFullAccess(role: UserRole): boolean {
+    return role === 'superadmin';
+}
+
+export function isMemberRole(role: UserRole): boolean {
+    return role === 'admin' || role === 'member';
+}
+
+export function canManage(role: UserRole): boolean {
+    return role === 'superadmin' || role === 'admin';
+}
+
 export type User = {
     id: number;
     name: string;
