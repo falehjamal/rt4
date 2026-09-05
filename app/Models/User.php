@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Concerns\LogsActivity;
 use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -24,6 +25,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property string $username
  * @property string $phone
  * @property UserRole $role
+ * @property bool $is_active
  * @property string $email
  * @property Carbon|null $email_verified_at
  * @property string $password
@@ -34,12 +36,12 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-#[Fillable(['name', 'username', 'phone', 'role', 'email', 'password'])]
+#[Fillable(['name', 'username', 'phone', 'role', 'is_active', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
 class User extends Authenticatable implements PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, LogsActivity, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -53,6 +55,7 @@ class User extends Authenticatable implements PasskeyUser
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
             'role' => UserRole::class,
+            'is_active' => 'boolean',
         ];
     }
 
@@ -77,6 +80,11 @@ class User extends Authenticatable implements PasskeyUser
     public function canManage(): bool
     {
         return $this->role->canManage();
+    }
+
+    public function auditLabel(): string
+    {
+        return $this->name.' ('.$this->username.')';
     }
 
     /**

@@ -73,6 +73,7 @@ class IuranController extends Controller
         $members = $user->canManage()
             ? User::query()
                 ->members()
+                ->where('is_active', true)
                 ->orderBy('name')
                 ->orderBy('id')
                 ->get(['id', 'name', 'username'])

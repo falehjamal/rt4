@@ -6,8 +6,8 @@ alwaysApply: false
 
 # Peran pengguna
 
-- `superadmin` bukan orang/member. Tidak muncul di dropdown member, tidak punya iuran. Kuasa penuh atas semua fitur.
-- `admin` bisa jadi member (boleh punya iuran) dan boleh kelola data.
-- `member` adalah member: iuran hanya miliknya; Kas RT dan Laporan Keuangan boleh dilihat semua (uang bersama), tanpa mutasi.
+- `superadmin` bukan orang/member. Tidak muncul di dropdown member, tidak punya iuran. Kuasa penuh atas semua fitur, termasuk Users dan Audit Log.
+- `admin` bisa jadi member (boleh punya iuran) dan boleh kelola data. Boleh kelola Users kecuali mengedit/menonaktifkan superadmin. Boleh lihat Audit Log.
+- `member` adalah member: iuran hanya miliknya; Kas RT dan Laporan Keuangan boleh dilihat semua (uang bersama), tanpa mutasi. Tidak boleh akses menu Manajemen.
 
 Pakai helper enum/model: `hasFullAccess()`, `isMember()`, `canManage()`, scope `User::members()`.

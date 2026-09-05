@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsActivity;
 use App\Enums\KasJenis;
 use App\Enums\KasKategori;
 use Database\Factories\KasFactory;
@@ -31,7 +32,7 @@ use Illuminate\Support\Facades\Storage;
 class Kas extends Model
 {
     /** @use HasFactory<KasFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     /**
      * @return array<string, string>
@@ -82,6 +83,11 @@ class Kas extends Model
     protected function keluar(Builder $query): Builder
     {
         return $query->where('jenis', KasJenis::Keluar);
+    }
+
+    public function auditLabel(): string
+    {
+        return 'Kas '.$this->jenis->label().' '.$this->kategori->label().' Rp '.number_format((float) $this->nominal, 0, ',', '.');
     }
 
     public function buktiUrl(): ?string

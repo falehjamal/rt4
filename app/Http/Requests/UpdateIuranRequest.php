@@ -31,7 +31,18 @@ class UpdateIuranRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('users', 'id')->where(
-                    fn ($query) => $query->whereIn('role', UserRole::memberValues()),
+                    function ($query): void {
+                        $query->whereIn('role', UserRole::memberValues())
+                            ->where(function ($inner): void {
+                                $inner->where('is_active', true);
+
+                                $iuran = $this->route('iuran');
+
+                                if ($iuran instanceof Iuran) {
+                                    $inner->orWhere('id', $iuran->user_id);
+                                }
+                            });
+                    },
                 ),
             ],
             'nominal' => ['required', 'numeric', 'min:0'],

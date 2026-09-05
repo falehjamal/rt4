@@ -32,6 +32,49 @@ enum UserRole: string
         return $this === self::Superadmin || $this === self::Admin;
     }
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::Superadmin => 'Superadmin',
+            self::Admin => 'Admin',
+            self::Member => 'Member',
+        };
+    }
+
+    /**
+     * @return list<array{value: string, label: string}>
+     */
+    public static function options(): array
+    {
+        return array_map(
+            fn (self $role): array => [
+                'value' => $role->value,
+                'label' => $role->label(),
+            ],
+            self::cases(),
+        );
+    }
+
+    /**
+     * Roles an actor may assign when creating or editing another user.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public static function assignableOptions(self $actor): array
+    {
+        $roles = $actor->hasFullAccess()
+            ? self::cases()
+            : [self::Admin, self::Member];
+
+        return array_map(
+            fn (self $role): array => [
+                'value' => $role->value,
+                'label' => $role->label(),
+            ],
+            $roles,
+        );
+    }
+
     /**
      * @return list<self>
      */

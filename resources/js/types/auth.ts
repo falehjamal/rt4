@@ -18,6 +18,7 @@ export type User = {
     username: string;
     phone: string;
     role: UserRole;
+    is_active?: boolean;
     email: string;
     avatar?: string;
     email_verified_at: string | null;

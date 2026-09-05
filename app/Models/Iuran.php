@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Concerns\LogsActivity;
 use App\Observers\IuranObserver;
 use Database\Factories\IuranFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -30,7 +31,7 @@ use Illuminate\Support\Facades\Storage;
 class Iuran extends Model
 {
     /** @use HasFactory<IuranFactory> */
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     /**
      * @return array<string, string>
@@ -59,6 +60,15 @@ class Iuran extends Model
     public function kas(): HasOne
     {
         return $this->hasOne(Kas::class);
+    }
+
+    public function auditLabel(): string
+    {
+        $nama = $this->relationLoaded('user')
+            ? $this->user->name
+            : User::query()->whereKey($this->user_id)->value('name');
+
+        return 'Iuran '.($nama ?? 'member').' Rp '.number_format((float) $this->nominal, 0, ',', '.');
     }
 
     public function buktiUrl(): ?string

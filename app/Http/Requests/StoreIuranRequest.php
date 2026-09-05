@@ -28,7 +28,8 @@ class StoreIuranRequest extends FormRequest
                 'required',
                 'integer',
                 Rule::exists('users', 'id')->where(
-                    fn ($query) => $query->whereIn('role', UserRole::memberValues()),
+                    fn ($query) => $query->whereIn('role', UserRole::memberValues())
+                        ->where('is_active', true),
                 ),
             ],
             'nominal' => ['required', 'numeric', 'min:0'],

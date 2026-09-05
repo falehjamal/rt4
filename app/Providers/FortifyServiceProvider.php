@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
 use Laravel\Fortify\Fortify;
@@ -57,6 +58,12 @@ class FortifyServiceProvider extends ServiceProvider
                 ->first();
 
             if ($user && Hash::check($request->string('password')->toString(), $user->password)) {
+                if (! $user->is_active) {
+                    throw ValidationException::withMessages([
+                        Fortify::username() => 'Akun ini dinonaktifkan. Hubungi pengurus RT.',
+                    ]);
+                }
+
                 return $user;
             }
 

@@ -1,5 +1,12 @@
-import { Link } from '@inertiajs/react';
-import { FileSpreadsheet, Landmark, LayoutGrid, Wallet } from 'lucide-react';
+import { Link, usePage } from '@inertiajs/react';
+import {
+    FileSpreadsheet,
+    Landmark,
+    LayoutGrid,
+    ScrollText,
+    Users,
+    Wallet,
+} from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,9 +21,12 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { laporan as laporanKeuangan } from '@/routes/keuangan';
 import { index as iuranIndex } from '@/routes/keuangan/iuran';
 import { index as kasIndex } from '@/routes/keuangan/kas';
-import { laporan as laporanKeuangan } from '@/routes/keuangan';
+import { audit as auditIndex } from '@/routes/manajemen';
+import { index as usersIndex } from '@/routes/manajemen/users';
+import { canManage } from '@/types/auth';
 import type { NavGroup, NavItem } from '@/types';
 
 const mainNavGroups: NavGroup[] = [
@@ -54,7 +64,28 @@ const mainNavGroups: NavGroup[] = [
 
 const footerNavItems: NavItem[] = [];
 
+const manajemenNavGroup: NavGroup = {
+    title: 'Manajemen',
+    items: [
+        {
+            title: 'Users',
+            href: usersIndex(),
+            icon: Users,
+        },
+        {
+            title: 'Audit Log',
+            href: auditIndex(),
+            icon: ScrollText,
+        },
+    ],
+};
+
 export function AppSidebar() {
+    const { auth } = usePage().props;
+    const groups = auth.user && canManage(auth.user.role)
+        ? [...mainNavGroups, manajemenNavGroup]
+        : mainNavGroups;
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -70,7 +101,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent>
-                <NavMain groups={mainNavGroups} />
+                <NavMain groups={groups} />
             </SidebarContent>
 
             <SidebarFooter>
