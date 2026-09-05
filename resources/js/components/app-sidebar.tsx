@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { LayoutGrid, Wallet } from 'lucide-react';
+import { Landmark, LayoutGrid, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as iuranIndex } from '@/routes/keuangan/iuran';
+import { index as kasIndex } from '@/routes/keuangan/kas';
 import type { NavGroup, NavItem } from '@/types';
 
 const mainNavGroups: NavGroup[] = [
@@ -35,6 +36,11 @@ const mainNavGroups: NavGroup[] = [
                 title: 'Iuran Member',
                 href: iuranIndex(),
                 icon: Wallet,
+            },
+            {
+                title: 'Kas RT',
+                href: kasIndex(),
+                icon: Landmark,
             },
         ],
     },
