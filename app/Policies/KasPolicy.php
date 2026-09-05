@@ -12,7 +12,7 @@ class KasPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->canManage();
     }
 
     /**
@@ -20,7 +20,7 @@ class KasPolicy
      */
     public function view(User $user, Kas $kas): bool
     {
-        return true;
+        return $user->canManage();
     }
 
     /**

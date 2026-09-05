@@ -1,4 +1,4 @@
-import { Form, Head, Link, router } from '@inertiajs/react';
+import { Form, Head, Link, router, setLayoutProps } from '@inertiajs/react';
 import {
     ArrowUpDown,
     ChevronDown,
@@ -121,6 +121,21 @@ export default function IuranIndex({
         });
     }
 
+    const pageTitle = canManage ? 'Iuran Member' : 'Iuran Saya';
+
+    setLayoutProps({
+        breadcrumbs: [
+            {
+                title: 'Keuangan',
+                href: index(),
+            },
+            {
+                title: pageTitle,
+                href: index(),
+            },
+        ],
+    });
+
     function deleteIuran(row: IuranRow): void {
         if (
             !window.confirm(
@@ -135,18 +150,19 @@ export default function IuranIndex({
 
     return (
         <>
-            <Head title="Iuran Member" />
+            <Head title={pageTitle} />
 
             <div className="flex flex-1 flex-col gap-5 p-4">
                 <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)]">
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 className="text-navy-700 text-xl font-bold">
-                                Iuran Member
+                                {pageTitle}
                             </h1>
                             <p className="mt-1 text-sm text-gray-500">
-                                Iuran warga/member untuk agustusan tahun depan.
-                                Setiap iuran otomatis nambah saldo Kas RT.
+                                {canManage
+                                    ? 'Iuran warga/member untuk agustusan tahun depan. Setiap iuran otomatis nambah saldo Kas RT.'
+                                    : 'Riwayat iuran yang sudah kamu bayar untuk agustusan tahun depan.'}
                             </p>
                         </div>
 
@@ -619,7 +635,7 @@ IuranIndex.layout = {
             href: index(),
         },
         {
-            title: 'Iuran Member',
+            title: 'Iuran Saya',
             href: index(),
         },
     ],

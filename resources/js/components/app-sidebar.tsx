@@ -29,39 +29,6 @@ import { index as usersIndex } from '@/routes/manajemen/users';
 import { canManage } from '@/types/auth';
 import type { NavGroup, NavItem } from '@/types';
 
-const mainNavGroups: NavGroup[] = [
-    {
-        title: 'Menu Utama',
-        items: [
-            {
-                title: 'Dashboard',
-                href: dashboard(),
-                icon: LayoutGrid,
-            },
-        ],
-    },
-    {
-        title: 'Keuangan & Kas',
-        items: [
-            {
-                title: 'Iuran Member',
-                href: iuranIndex(),
-                icon: Wallet,
-            },
-            {
-                title: 'Kas RT',
-                href: kasIndex(),
-                icon: Landmark,
-            },
-            {
-                title: 'Laporan Keuangan',
-                href: laporanKeuangan(),
-                icon: FileSpreadsheet,
-            },
-        ],
-    },
-];
-
 const footerNavItems: NavItem[] = [];
 
 const manajemenNavGroup: NavGroup = {
@@ -82,9 +49,52 @@ const manajemenNavGroup: NavGroup = {
 
 export function AppSidebar() {
     const { auth } = usePage().props;
-    const groups = auth.user && canManage(auth.user.role)
-        ? [...mainNavGroups, manajemenNavGroup]
-        : mainNavGroups;
+    const manage = auth.user ? canManage(auth.user.role) : false;
+
+    const groups: NavGroup[] = [
+        {
+            title: 'Menu Utama',
+            items: [
+                {
+                    title: 'Dashboard',
+                    href: dashboard(),
+                    icon: LayoutGrid,
+                },
+            ],
+        },
+        {
+            title: manage ? 'Keuangan & Kas' : 'Keuangan',
+            items: manage
+                ? [
+                      {
+                          title: 'Iuran Member',
+                          href: iuranIndex(),
+                          icon: Wallet,
+                      },
+                      {
+                          title: 'Kas RT',
+                          href: kasIndex(),
+                          icon: Landmark,
+                      },
+                      {
+                          title: 'Laporan Keuangan',
+                          href: laporanKeuangan(),
+                          icon: FileSpreadsheet,
+                      },
+                  ]
+                : [
+                      {
+                          title: 'Iuran Saya',
+                          href: iuranIndex(),
+                          icon: Wallet,
+                      },
+                  ],
+        },
+    ];
+
+    if (manage) {
+        groups.push(manajemenNavGroup);
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">
