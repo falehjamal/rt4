@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { Landmark, LayoutGrid, Wallet } from 'lucide-react';
+import { FileSpreadsheet, Landmark, LayoutGrid, Wallet } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -16,6 +16,7 @@ import {
 import { dashboard } from '@/routes';
 import { index as iuranIndex } from '@/routes/keuangan/iuran';
 import { index as kasIndex } from '@/routes/keuangan/kas';
+import { laporan as laporanKeuangan } from '@/routes/keuangan';
 import type { NavGroup, NavItem } from '@/types';
 
 const mainNavGroups: NavGroup[] = [
@@ -41,6 +42,11 @@ const mainNavGroups: NavGroup[] = [
                 title: 'Kas RT',
                 href: kasIndex(),
                 icon: Landmark,
+            },
+            {
+                title: 'Laporan Keuangan',
+                href: laporanKeuangan(),
+                icon: FileSpreadsheet,
             },
         ],
     },

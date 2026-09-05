@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Observers\IuranObserver;
 use Database\Factories\IuranFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
@@ -20,8 +23,10 @@ use Illuminate\Support\Facades\Storage;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property-read User $user
+ * @property-read Kas|null $kas
  */
 #[Fillable(['user_id', 'nominal', 'tanggal_iuran', 'keterangan', 'bukti'])]
+#[ObservedBy(IuranObserver::class)]
 class Iuran extends Model
 {
     /** @use HasFactory<IuranFactory> */
@@ -44,6 +49,16 @@ class Iuran extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The kas mutation generated from this iuran.
+     *
+     * @return HasOne<Kas, $this>
+     */
+    public function kas(): HasOne
+    {
+        return $this->hasOne(Kas::class);
     }
 
     public function buktiUrl(): ?string

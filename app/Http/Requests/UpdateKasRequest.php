@@ -29,7 +29,7 @@ class UpdateKasRequest extends FormRequest
     {
         return [
             'jenis' => ['required', Rule::enum(KasJenis::class)],
-            'kategori' => ['required', Rule::enum(KasKategori::class)],
+            'kategori' => ['required', Rule::enum(KasKategori::class)->except(KasKategori::Iuran)],
             'nominal' => ['required', 'numeric', 'min:0'],
             'tanggal' => ['required', 'date'],
             'keterangan' => ['nullable', 'string', 'max:255'],

@@ -32,11 +32,12 @@ class KasPolicy
     }
 
     /**
-     * Determine whether the user can update the model.
+     * Mutations generated from an iuran are corrected from the iuran instead,
+     * so the kas row always matches its source.
      */
     public function update(User $user, Kas $kas): bool
     {
-        return $user->canManage();
+        return $user->canManage() && ! $kas->dariIuran();
     }
 
     /**
@@ -44,6 +45,6 @@ class KasPolicy
      */
     public function delete(User $user, Kas $kas): bool
     {
-        return $user->canManage();
+        return $user->canManage() && ! $kas->dariIuran();
     }
 }

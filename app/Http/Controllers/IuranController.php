@@ -8,6 +8,7 @@ use App\Models\Iuran;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -100,9 +101,11 @@ class IuranController extends Controller
             $data['bukti'] = $request->file('bukti')->store('iuran', 'public');
         }
 
-        Iuran::query()->create($data);
+        DB::transaction(function () use ($data): void {
+            Iuran::query()->create($data);
+        });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Iurannya udah masuk, sip.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Iurannya udah masuk dan otomatis nambah saldo kas.']);
 
         return to_route('keuangan.iuran.index');
     }
@@ -122,9 +125,11 @@ class IuranController extends Controller
             $data['bukti'] = $request->file('bukti')->store('iuran', 'public');
         }
 
-        $iuran->update($data);
+        DB::transaction(function () use ($iuran, $data): void {
+            $iuran->update($data);
+        });
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Iurannya udah diupdate.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Iurannya udah diupdate, mutasi kasnya ikut menyesuaikan.']);
 
         return to_route('keuangan.iuran.index');
     }
@@ -136,13 +141,15 @@ class IuranController extends Controller
     {
         Gate::authorize('delete', $iuran);
 
+        DB::transaction(function () use ($iuran): void {
+            $iuran->delete();
+        });
+
         if ($iuran->bukti) {
             Storage::disk('public')->delete($iuran->bukti);
         }
 
-        $iuran->delete();
-
-        Inertia::flash('toast', ['type' => 'success', 'message' => 'Iurannya udah dihapus.']);
+        Inertia::flash('toast', ['type' => 'success', 'message' => 'Iurannya udah dihapus bareng mutasi kasnya.']);
 
         return to_route('keuangan.iuran.index');
     }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IuranController;
 use App\Http\Controllers\KasController;
+use App\Http\Controllers\LaporanKeuanganController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,6 +21,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->except(['create', 'show', 'edit'])
         ->parameters(['kas' => 'kas'])
         ->names('keuangan.kas');
+
+    Route::get('keuangan/laporan', LaporanKeuanganController::class)
+        ->name('keuangan.laporan');
 });
 
 require __DIR__.'/settings.php';

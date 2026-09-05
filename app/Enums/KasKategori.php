@@ -34,4 +34,18 @@ enum KasKategori: string
             self::cases(),
         );
     }
+
+    /**
+     * Categories a user may pick when recording a kas mutation by hand. Iuran
+     * is excluded because those mutations are generated from the iurans table.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    public static function manualOptions(): array
+    {
+        return array_values(array_filter(
+            self::options(),
+            fn (array $option): bool => $option['value'] !== self::Iuran->value,
+        ));
+    }
 }

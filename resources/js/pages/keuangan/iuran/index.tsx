@@ -146,6 +146,7 @@ export default function IuranIndex({
                             </h1>
                             <p className="mt-1 text-sm text-gray-500">
                                 Iuran warga/member untuk agustusan tahun depan.
+                                Setiap iuran otomatis nambah saldo Kas RT.
                             </p>
                         </div>
 
@@ -470,7 +471,8 @@ export default function IuranIndex({
                                 {editing ? 'Edit iuran' : 'Tambah iuran'}
                             </DialogTitle>
                             <DialogDescription>
-                                Isi data iuran member. Keterangan dan bukti
+                                Isi data iuran member. Nominalnya langsung jadi
+                                mutasi masuk di Kas RT. Keterangan dan bukti
                                 boleh dikosongin.
                             </DialogDescription>
                         </DialogHeader>

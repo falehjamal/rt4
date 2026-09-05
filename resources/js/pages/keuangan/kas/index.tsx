@@ -31,6 +31,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
+import { index as iuranIndex } from '@/routes/keuangan/iuran';
 import { destroy, index, store, update } from '@/routes/keuangan/kas';
 
 type Option = {
@@ -49,6 +50,8 @@ type KasRow = {
     tanggal_label: string;
     keterangan: string | null;
     bukti_url: string | null;
+    dari_iuran: boolean;
+    iuran_member: string | null;
     created_at: string | null;
     updated_at: string | null;
 };
@@ -178,8 +181,9 @@ export default function KasIndex({
                                 Kas RT
                             </h1>
                             <p className="mt-1 text-sm text-gray-500">
-                                Buku kas bersama. Iuran tercatat terpisah, setor
-                                ke kas lewat mutasi masuk.
+                                Buku kas bersama. Iuran member otomatis masuk
+                                sini, di halaman ini catat donasi dan
+                                pengeluaran.
                             </p>
                         </div>
 
@@ -305,7 +309,8 @@ export default function KasIndex({
                                                             <Eye />
                                                             Detail
                                                         </DropdownMenuItem>
-                                                        {canManage && (
+                                                        {canManage &&
+                                                            !row.dari_iuran && (
                                                             <>
                                                                 <DropdownMenuItem
                                                                     className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 [&_svg]:text-amber-600"
@@ -331,6 +336,23 @@ export default function KasIndex({
                                                                 </DropdownMenuItem>
                                                             </>
                                                         )}
+                                                        {canManage &&
+                                                            row.dari_iuran && (
+                                                                <DropdownMenuItem
+                                                                    asChild
+                                                                    className="text-amber-600 focus:bg-amber-50 focus:text-amber-700 [&_svg]:text-amber-600"
+                                                                >
+                                                                    <Link
+                                                                        href={
+                                                                            iuranIndex.url()
+                                                                        }
+                                                                    >
+                                                                        <Pencil />
+                                                                        Koreksi di
+                                                                        Iuran
+                                                                    </Link>
+                                                                </DropdownMenuItem>
+                                                            )}
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </td>
@@ -349,7 +371,14 @@ export default function KasIndex({
                                                 </span>
                                             </td>
                                             <td className="py-3">
-                                                {row.kategori_label}
+                                                <span className="flex flex-wrap items-center gap-1.5">
+                                                    {row.kategori_label}
+                                                    {row.dari_iuran && (
+                                                        <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-700">
+                                                            dari iuran
+                                                        </span>
+                                                    )}
+                                                </span>
                                             </td>
                                             <td className="py-3 font-semibold">
                                                 {formatRupiah(row.nominal)}
@@ -449,6 +478,14 @@ export default function KasIndex({
                                 </dd>
                             </div>
                             <div>
+                                <dt className="text-horizon-gray">Sumber</dt>
+                                <dd className="text-navy-700">
+                                    {detail.dari_iuran
+                                        ? `Iuran ${detail.iuran_member ?? 'member'} - koreksi lewat menu Iuran Member`
+                                        : 'Dicatat manual di Kas RT'}
+                                </dd>
+                            </div>
+                            <div>
                                 <dt className="text-horizon-gray">Nominal</dt>
                                 <dd className="text-navy-700 font-semibold">
                                     {formatRupiah(detail.nominal)}
@@ -507,8 +544,9 @@ export default function KasIndex({
                                 {editing ? 'Edit mutasi kas' : 'Tambah mutasi kas'}
                             </DialogTitle>
                             <DialogDescription>
-                                Catat uang masuk atau keluar. Keterangan dan
-                                bukti boleh dikosongin.
+                                Catat uang masuk atau keluar. Kategori Iuran
+                                nggak ada di sini karena diisi otomatis dari
+                                menu Iuran Member.
                             </DialogDescription>
                         </DialogHeader>
 

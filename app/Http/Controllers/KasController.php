@@ -42,6 +42,7 @@ class KasController extends Controller
         $akhirBulan = now()->endOfMonth()->toDateString();
 
         $kas = Kas::query()
+            ->with('iuran.user:id,name')
             ->when($search !== '', function ($query) use ($search): void {
                 $query->where(function ($inner) use ($search): void {
                     $inner->where('keterangan', 'like', "%{$search}%")
@@ -64,6 +65,8 @@ class KasController extends Controller
                 'tanggal_label' => $mutasi->tanggal?->format('d M Y'),
                 'keterangan' => $mutasi->keterangan,
                 'bukti_url' => $mutasi->buktiUrl(),
+                'dari_iuran' => $mutasi->dariIuran(),
+                'iuran_member' => $mutasi->iuran?->user->name,
                 'created_at' => $mutasi->created_at?->format('d M Y H:i'),
                 'updated_at' => $mutasi->updated_at?->format('d M Y H:i'),
             ]);
@@ -82,7 +85,7 @@ class KasController extends Controller
                     ->sum('nominal'),
             ],
             'jenisOptions' => KasJenis::options(),
-            'kategoriOptions' => KasKategori::options(),
+            'kategoriOptions' => KasKategori::manualOptions(),
             'filters' => [
                 'search' => $search,
                 'sort' => array_key_exists($sort, $sortable) ? $sort : 'tanggal',
