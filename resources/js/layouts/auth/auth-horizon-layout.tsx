@@ -18,9 +18,7 @@ export default function AuthHorizonLayout({
                         href={home()}
                         className="mt-0 flex w-max items-center gap-3 lg:pt-10"
                     >
-                        <span className="bg-brand-500 flex size-10 items-center justify-center rounded-xl text-white">
-                            <AppLogoIcon className="size-5 fill-current" />
-                        </span>
+                        <AppLogoIcon className="size-10 rounded-xl object-contain" />
                         <span className="text-navy-700 text-lg font-bold">
                             {name}
                         </span>

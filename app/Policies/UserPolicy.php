@@ -50,10 +50,14 @@ class UserPolicy
 
     public function toggleActive(User $user, User $model): bool
     {
-        if ($user->is($model)) {
+        if ($user->is($model) || ! $user->canManage()) {
             return false;
         }
 
-        return $this->update($user, $model);
+        if ($user->hasFullAccess()) {
+            return true;
+        }
+
+        return ! $model->hasFullAccess();
     }
 }

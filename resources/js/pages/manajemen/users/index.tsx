@@ -437,6 +437,33 @@ export default function UsersIndex({
                             </div>
                         </dl>
                     )}
+
+                    {detail?.can_toggle && (
+                        <DialogFooter>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className={
+                                    detail.is_active
+                                        ? 'text-red-600 hover:bg-red-50 hover:text-red-700'
+                                        : 'text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700'
+                                }
+                                onClick={() => {
+                                    toggleUser(detail);
+                                    setDetail(null);
+                                }}
+                            >
+                                {detail.is_active ? (
+                                    <Ban />
+                                ) : (
+                                    <CheckCircle2 />
+                                )}
+                                {detail.is_active
+                                    ? 'Nonaktifkan'
+                                    : 'Aktifkan'}
+                            </Button>
+                        </DialogFooter>
+                    )}
                 </DialogContent>
             </Dialog>
 

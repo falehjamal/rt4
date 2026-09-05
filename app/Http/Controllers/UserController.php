@@ -26,7 +26,10 @@ class UserController extends Controller
         $actor = $request->user();
         $search = $request->string('search')->trim()->toString();
         $sort = $request->string('sort')->toString();
-        $direction = $request->string('direction')->toString() === 'asc' ? 'asc' : 'desc';
+        $direction = match ($request->string('direction')->toString()) {
+            'desc' => 'desc',
+            default => 'asc',
+        };
 
         $sortable = [
             'id' => 'id',
@@ -37,7 +40,7 @@ class UserController extends Controller
             'created_at' => 'created_at',
         ];
 
-        $sortColumn = $sortable[$sort] ?? 'name';
+        $sortColumn = $sortable[$sort] ?? 'id';
 
         $users = User::query()
             ->when($search !== '', function ($query) use ($search): void {
@@ -72,7 +75,7 @@ class UserController extends Controller
             'roleOptions' => UserRole::assignableOptions($actor->role),
             'filters' => [
                 'search' => $search,
-                'sort' => array_key_exists($sort, $sortable) ? $sort : 'name',
+                'sort' => array_key_exists($sort, $sortable) ? $sort : 'id',
                 'direction' => $direction,
             ],
             'canCreate' => $actor->can('create', User::class),
@@ -138,6 +141,6 @@ class UserController extends Controller
                 : $user->name.' dinonaktifkan.',
         ]);
 
-        return to_route('manajemen.users.index');
+        return back();
     }
 }

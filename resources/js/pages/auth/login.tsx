@@ -1,18 +1,21 @@
 import { Form, Head, usePage } from '@inertiajs/react';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import InputError from '@/components/input-error';
 import PasswordInput from '@/components/password-input';
-import TextLink from '@/components/text-link';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
-import { request } from '@/routes/password';
 
 type Props = {
     status?: string;
-    canResetPassword: boolean;
 };
 
 const fieldClassName =
@@ -45,8 +48,9 @@ function OutlinedField({
     );
 }
 
-export default function Login({ status, canResetPassword }: Props) {
+export default function Login({ status }: Props) {
     const { csrf_token } = usePage().props;
+    const [forgotOpen, setForgotOpen] = useState(false);
 
     return (
         <div className="flex min-h-svh items-center justify-center bg-[#e8eaee] p-4">
@@ -54,6 +58,11 @@ export default function Login({ status, canResetPassword }: Props) {
 
             <div className="w-full max-w-[380px] overflow-hidden rounded-[28px] bg-white shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
                 <div className="relative bg-gradient-to-r from-[#3b82f6] to-[#7c3aed] px-8 pt-10 pb-14">
+                    <img
+                        src="/logo.png"
+                        alt="RT 4"
+                        className="mb-4 size-14 rounded-2xl object-contain shadow-lg"
+                    />
                     <p className="text-[15px] text-white">
                         Sistem Informasi RT 4,
                     </p>
@@ -88,7 +97,7 @@ export default function Login({ status, canResetPassword }: Props) {
 
                             <OutlinedField
                                 id="login"
-                                label="Username"
+                                label="Username / Nomor HP"
                                 error={errors.login}
                             >
                                 <input
@@ -120,29 +129,15 @@ export default function Login({ status, canResetPassword }: Props) {
                                 />
                             </OutlinedField>
 
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                    <Checkbox
-                                        id="remember"
-                                        name="remember"
-                                        tabIndex={3}
-                                    />
-                                    <Label
-                                        htmlFor="remember"
-                                        className="text-sm font-medium text-[#64748b]"
-                                    >
-                                        Tetap masuk
-                                    </Label>
-                                </div>
-                                {canResetPassword && (
-                                    <TextLink
-                                        href={request()}
-                                        className="text-sm font-medium text-[#6366f1] no-underline"
-                                        tabIndex={5}
-                                    >
-                                        Lupa password?
-                                    </TextLink>
-                                )}
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    tabIndex={3}
+                                    className="text-sm font-medium text-[#6366f1]"
+                                    onClick={() => setForgotOpen(true)}
+                                >
+                                    Lupa password?
+                                </button>
                             </div>
 
                             <button
@@ -155,17 +150,6 @@ export default function Login({ status, canResetPassword }: Props) {
                                 {processing && <Spinner />}
                                 Log in
                             </button>
-
-                            <div className="text-center text-sm text-[#64748b]">
-                                Belum punya akun?{' '}
-                                <TextLink
-                                    href={register()}
-                                    className="font-medium text-[#6366f1] no-underline"
-                                    tabIndex={6}
-                                >
-                                    Daftar
-                                </TextLink>
-                            </div>
                         </>
                     )}
                 </Form>
@@ -176,6 +160,27 @@ export default function Login({ status, canResetPassword }: Props) {
                     </div>
                 )}
             </div>
+
+            <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Lupa password?</DialogTitle>
+                        <DialogDescription>
+                            Hubungi admin atau pengurus RT untuk mereset
+                            password akun Anda.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            className="bg-brand-500 hover:bg-brand-600"
+                            onClick={() => setForgotOpen(false)}
+                        >
+                            Mengerti
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
