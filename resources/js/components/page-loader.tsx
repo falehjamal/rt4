@@ -1,29 +1,18 @@
-import { router } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
+import { usePageLoading } from '@/hooks/use-page-loading';
 
 export default function PageLoader() {
-    const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        const removeStart = router.on('start', () => setLoading(true));
-        const removeFinish = router.on('finish', () => setLoading(false));
-
-        return () => {
-            removeStart();
-            removeFinish();
-        };
-    }, []);
+    const { loading } = usePageLoading();
 
     if (!loading) {
         return null;
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/70 backdrop-blur-sm">
-            <div className="flex flex-col items-center gap-3 rounded-2xl bg-white px-8 py-6 shadow-lg">
-                <Spinner className="text-brand-500 size-8" />
-                <p className="text-navy-700 text-sm font-medium">Memuat...</p>
+        <div className="pointer-events-none fixed top-4 right-4 z-50">
+            <div className="flex size-10 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-black/5">
+                <Spinner className="text-brand-500 size-5" />
+                <span className="sr-only">Memuat</span>
             </div>
         </div>
     );

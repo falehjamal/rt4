@@ -51,6 +51,7 @@ class DashboardController extends Controller
                     ],
                 ],
                 'iurans' => $this->recentIurans(),
+                'iuranTerbanyak' => $this->topIurans(),
                 'mutasi' => $this->recentMutasi(),
             ]);
         }
@@ -69,7 +70,7 @@ class DashboardController extends Controller
             'canManage' => false,
             'stats' => [
                 [
-                    'key' => 'iuran',
+                    'key' => 'total',
                     'title' => 'Total iuran kamu',
                     'value' => (string) (clone $iuranSaya)->sum('nominal'),
                 ],
@@ -90,17 +91,18 @@ class DashboardController extends Controller
                 ],
             ],
             'iurans' => $this->recentIurans($user->id),
+            'iuranTerbanyak' => $this->topIurans($user->id),
             'mutasi' => [],
         ]);
     }
 
     /**
-     * @return list<array{id: int, member: string, nominal: string, tanggal_label: string|null, keterangan: string|null}>
+     * @return list<array{id: int, member: string, username: string, nominal: string, tanggal_label: string|null, keterangan: string|null}>
      */
     private function recentIurans(?int $userId = null): array
     {
         return Iuran::query()
-            ->with('user:id,name')
+            ->with('user:id,name,username')
             ->when($userId !== null, fn ($query) => $query->where('user_id', $userId))
             ->orderByDesc('tanggal_iuran')
             ->orderByDesc('id')
@@ -109,9 +111,48 @@ class DashboardController extends Controller
             ->map(fn (Iuran $iuran): array => [
                 'id' => $iuran->id,
                 'member' => $iuran->user->name,
+                'username' => $iuran->user->username,
                 'nominal' => $iuran->nominal,
                 'tanggal_label' => $iuran->tanggal_iuran?->format('d M Y'),
                 'keterangan' => $iuran->keterangan,
+            ])
+            ->all();
+    }
+
+    /**
+     * @return list<array{id: int, member: string, username: string, nominal: string}>
+     */
+    private function topIurans(?int $userId = null): array
+    {
+        if ($userId !== null) {
+            return Iuran::query()
+                ->with('user:id,name,username')
+                ->where('user_id', $userId)
+                ->orderByDesc('nominal')
+                ->orderByDesc('id')
+                ->limit(5)
+                ->get()
+                ->map(fn (Iuran $iuran): array => [
+                    'id' => $iuran->id,
+                    'member' => $iuran->user->name,
+                    'username' => $iuran->user->username,
+                    'nominal' => $iuran->nominal,
+                ])
+                ->all();
+        }
+
+        return User::query()
+            ->members()
+            ->whereHas('iurans')
+            ->withSum('iurans as total_iuran', 'nominal')
+            ->orderByDesc('total_iuran')
+            ->limit(5)
+            ->get()
+            ->map(fn (User $member): array => [
+                'id' => $member->id,
+                'member' => $member->name,
+                'username' => $member->username,
+                'nominal' => (string) ($member->getAttribute('total_iuran') ?? 0),
             ])
             ->all();
     }
@@ -124,7 +165,7 @@ class DashboardController extends Controller
         return Kas::query()
             ->orderByDesc('tanggal')
             ->orderByDesc('id')
-            ->limit(6)
+            ->limit(8)
             ->get()
             ->map(fn (Kas $kas): array => [
                 'id' => $kas->id,

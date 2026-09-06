@@ -1,19 +1,16 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
+    ArrowDownLeft,
     ArrowUpRight,
     CalendarDays,
-    Home,
     Landmark,
     ListChecks,
     Users,
     Wallet,
 } from 'lucide-react';
-import Widget from '@/components/horizon/widget';
-import { Button } from '@/components/ui/button';
 import { dashboard } from '@/routes';
 import { index as iuranIndex } from '@/routes/keuangan/iuran';
 import { index as kasIndex } from '@/routes/keuangan/kas';
-import type { Auth } from '@/types';
 
 type Stat = {
     key: string;
@@ -24,6 +21,7 @@ type Stat = {
 type IuranRingkas = {
     id: number;
     member: string;
+    username?: string;
     nominal: string;
     tanggal_label: string | null;
     keterangan: string | null;
@@ -38,15 +36,89 @@ type MutasiRingkas = {
     tanggal_label: string | null;
 };
 
-const statIcons: Record<string, typeof Users> = {
-    warga: Users,
-    iuran: Wallet,
-    saldo: Landmark,
-    keluar: ArrowUpRight,
-    bulan: CalendarDays,
-    jumlah: ListChecks,
-    terakhir: CalendarDays,
+const statThemes: Record<
+    string,
+    {
+        icon: typeof Users;
+        iconWrap: string;
+        iconColor: string;
+        caption: (value: string) => string;
+        format: (value: string) => string;
+    }
+> = {
+    warga: {
+        icon: Users,
+        iconWrap: 'bg-sky-50',
+        iconColor: 'text-sky-500',
+        caption: () => 'Warga aktif terdaftar',
+        format: (value) => `${value} orang`,
+    },
+    iuran: {
+        icon: Wallet,
+        iconWrap: 'bg-violet-50',
+        iconColor: 'text-violet-500',
+        caption: () => 'Tercatat bulan ini',
+        format: formatRupiah,
+    },
+    total: {
+        icon: Wallet,
+        iconWrap: 'bg-violet-50',
+        iconColor: 'text-violet-500',
+        caption: () => 'Semua setoran kamu',
+        format: formatRupiah,
+    },
+    saldo: {
+        icon: Landmark,
+        iconWrap: 'bg-emerald-50',
+        iconColor: 'text-emerald-500',
+        caption: (value) =>
+            Number(value) > 0 ? 'Aman & terverifikasi' : 'Perlu perhatian',
+        format: formatRupiah,
+    },
+    keluar: {
+        icon: ArrowUpRight,
+        iconWrap: 'bg-rose-50',
+        iconColor: 'text-rose-500',
+        caption: () => 'Pengeluaran bulan ini',
+        format: formatRupiah,
+    },
+    bulan: {
+        icon: CalendarDays,
+        iconWrap: 'bg-violet-50',
+        iconColor: 'text-violet-500',
+        caption: () => 'Setoran kamu bulan ini',
+        format: formatRupiah,
+    },
+    jumlah: {
+        icon: ListChecks,
+        iconWrap: 'bg-sky-50',
+        iconColor: 'text-sky-500',
+        caption: () => 'Total transaksi iuran',
+        format: (value) => `${value} setoran`,
+    },
+    terakhir: {
+        icon: CalendarDays,
+        iconWrap: 'bg-amber-50',
+        iconColor: 'text-amber-500',
+        caption: () => 'Tanggal setoran terakhir',
+        format: (value) => value,
+    },
 };
+
+const avatarColors = [
+    'bg-amber-100 text-amber-700',
+    'bg-sky-100 text-sky-700',
+    'bg-violet-100 text-violet-700',
+    'bg-emerald-100 text-emerald-700',
+    'bg-rose-100 text-rose-700',
+];
+
+const badgeColors = [
+    'bg-emerald-50 text-emerald-700',
+    'bg-violet-50 text-violet-700',
+    'bg-sky-50 text-sky-700',
+    'bg-amber-50 text-amber-700',
+];
 
 function formatRupiah(value: string): string {
     return new Intl.NumberFormat('id-ID', {
@@ -56,69 +128,106 @@ function formatRupiah(value: string): string {
     }).format(Number(value));
 }
 
-function formatStat(stat: Stat): string {
-    if (['iuran', 'saldo', 'keluar', 'bulan'].includes(stat.key)) {
-        return formatRupiah(stat.value);
+function initial(name: string): string {
+    return name.trim().charAt(0).toUpperCase() || '?';
+}
+
+function colorByText(name: string, palette: string[]): string {
+    let hash = 0;
+
+    for (const char of name) {
+        hash = (hash + char.charCodeAt(0)) % palette.length;
     }
 
-    return stat.value;
+    return palette[hash] ?? palette[0];
 }
+
+function rankColor(index: number): string {
+    if (index === 0) {
+        return 'bg-amber-100 text-amber-700';
+    }
+
+    if (index === 1) {
+        return 'bg-slate-100 text-slate-600';
+    }
+
+    if (index === 2) {
+        return 'bg-orange-100 text-orange-700';
+    }
+
+    return 'bg-gray-50 text-gray-500';
+}
+
+type IuranTerbanyak = {
+    id: number;
+    member: string;
+    username: string;
+    nominal: string;
+};
 
 export default function Dashboard({
     canManage,
     stats,
     iurans,
+    iuranTerbanyak,
     mutasi,
 }: {
     canManage: boolean;
     stats: Stat[];
     iurans: IuranRingkas[];
+    iuranTerbanyak: IuranTerbanyak[];
     mutasi: MutasiRingkas[];
 }) {
-    const { auth } = usePage<{ auth: Auth }>().props;
-
     return (
         <>
             <Head title="Dashboard" />
 
             <div className="flex flex-1 flex-col gap-5 p-4">
-                <div className="from-brand-500 to-brand-700 relative overflow-hidden rounded-[20px] bg-gradient-to-br px-6 py-8 text-white">
-                    <p className="text-sm font-medium text-white/80">
-                        Selamat datang
-                    </p>
-                    <h2 className="mt-1 text-3xl font-bold">
-                        {auth.user.name}
-                    </h2>
-                    <p className="mt-2 max-w-xl text-sm text-white/80">
-                        {canManage
-                            ? 'Ringkasan iuran dan kas RT. Kelola data lewat menu di samping.'
-                            : 'Cek iuran yang sudah kamu bayar. Detail lengkap ada di menu Iuran Saya.'}
-                    </p>
-                    <Home className="absolute right-8 bottom-6 size-24 text-white/10" />
-                </div>
-
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
                     {stats.map((stat) => {
-                        const Icon = statIcons[stat.key] ?? Wallet;
+                        const theme = statThemes[stat.key] ?? statThemes.iuran;
+                        const Icon = theme.icon;
 
                         return (
-                            <Widget
+                            <div
                                 key={stat.key}
-                                icon={<Icon className="size-7" />}
-                                title={stat.title}
-                                subtitle={formatStat(stat)}
-                            />
+                                className="relative rounded-[20px] bg-white p-5 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)]"
+                            >
+                                <div
+                                    className={`absolute top-4 right-4 flex size-11 items-center justify-center rounded-full ${theme.iconWrap}`}
+                                >
+                                    <Icon
+                                        className={`size-5 ${theme.iconColor}`}
+                                    />
+                                </div>
+                                <p className="text-[11px] font-semibold tracking-[0.14em] text-gray-400 uppercase">
+                                    {stat.title}
+                                </p>
+                                <p className="text-navy-700 mt-3 pr-12 text-2xl leading-tight font-bold">
+                                    {theme.format(stat.value)}
+                                </p>
+                                <p
+                                    className={`mt-3 text-xs font-medium ${
+                                        stat.key === 'saldo' &&
+                                        Number(stat.value) <= 0
+                                            ? 'text-rose-600'
+                                            : 'text-emerald-600'
+                                    }`}
+                                >
+                                    {theme.caption(stat.value)}
+                                </p>
+                            </div>
                         );
                     })}
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
-                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] xl:col-span-3">
+                <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
+                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] lg:col-span-3">
                         <div className="flex items-start justify-between gap-3">
                             <div>
                                 <h3 className="text-navy-700 text-lg font-bold">
                                     {canManage
-                                        ? 'Iuran terbaru'
+                                        ? 'Iuran Terbaru'
                                         : 'Iuran kamu'}
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-500">
@@ -127,11 +236,12 @@ export default function Dashboard({
                                         : 'Riwayat setoran iuran milikmu.'}
                                 </p>
                             </div>
-                            <Button variant="outline" asChild>
-                                <Link href={iuranIndex()}>
-                                    {canManage ? 'Iuran Member' : 'Iuran Saya'}
-                                </Link>
-                            </Button>
+                            <Link
+                                href={iuranIndex()}
+                                className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-600"
+                            >
+                                {canManage ? 'Iuran Member' : 'Iuran Saya'}
+                            </Link>
                         </div>
 
                         <div className="mt-5 overflow-x-auto">
@@ -171,18 +281,49 @@ export default function Dashboard({
                                                 className="text-navy-700 border-b border-gray-50 last:border-0"
                                             >
                                                 {canManage && (
-                                                    <td className="py-3 font-semibold">
-                                                        {row.member}
+                                                    <td className="py-3">
+                                                        <div className="flex items-center gap-3">
+                                                            <span
+                                                                className={`flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-bold ${colorByText(row.member, avatarColors)}`}
+                                                            >
+                                                                {initial(
+                                                                    row.member,
+                                                                )}
+                                                            </span>
+                                                            <div>
+                                                                <p className="font-semibold">
+                                                                    {row.member}
+                                                                </p>
+                                                                {row.username && (
+                                                                    <p className="text-xs text-gray-400">
+                                                                        @
+                                                                        {
+                                                                            row.username
+                                                                        }
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                 )}
-                                                <td className="py-3 font-semibold">
+                                                <td className="py-3 font-semibold text-sky-600">
                                                     {formatRupiah(row.nominal)}
                                                 </td>
-                                                <td className="py-3">
+                                                <td className="py-3 text-gray-500">
                                                     {row.tanggal_label ?? '-'}
                                                 </td>
                                                 <td className="py-3">
-                                                    {row.keterangan ?? '-'}
+                                                    {row.keterangan ? (
+                                                        <span
+                                                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${colorByText(row.keterangan, badgeColors)}`}
+                                                        >
+                                                            {row.keterangan}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-gray-400">
+                                                            -
+                                                        </span>
+                                                    )}
                                                 </td>
                                             </tr>
                                         ))
@@ -190,83 +331,202 @@ export default function Dashboard({
                                 </tbody>
                             </table>
                         </div>
+
+                        <Link
+                            href={iuranIndex()}
+                            className="mt-5 inline-flex text-sm font-semibold text-sky-600"
+                        >
+                            Lihat seluruh riwayat →
+                        </Link>
                     </div>
 
-                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] xl:col-span-2">
-                        {canManage ? (
-                            <>
-                                <div className="flex items-start justify-between gap-3">
-                                    <div>
-                                        <h3 className="text-navy-700 text-lg font-bold">
-                                            Mutasi kas
-                                        </h3>
-                                        <p className="mt-1 text-sm text-gray-500">
-                                            Uang masuk dan keluar terbaru.
-                                        </p>
-                                    </div>
-                                    <Button variant="outline" asChild>
-                                        <Link href={kasIndex()}>Kas RT</Link>
-                                    </Button>
-                                </div>
+                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] lg:col-span-2">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 className="text-navy-700 text-lg font-bold">
+                                    5 Iuran Terbanyak
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {canManage
+                                        ? 'Member dengan total setoran tertinggi.'
+                                        : 'Setoran kamu dengan nominal terbesar.'}
+                                </p>
+                            </div>
+                            <Link
+                                href={iuranIndex()}
+                                className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-600"
+                            >
+                                Ranking
+                            </Link>
+                        </div>
 
-                                <div className="mt-5 space-y-3">
+                        <div className="mt-5 space-y-4">
+                            {iuranTerbanyak.length === 0 ? (
+                                <p className="text-horizon-gray text-sm">
+                                    Belum ada data iuran.
+                                </p>
+                            ) : (
+                                iuranTerbanyak.map((row, index) => (
+                                    <div
+                                        key={row.id}
+                                        className="flex items-center justify-between gap-3"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span
+                                                className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${rankColor(index)}`}
+                                            >
+                                                {index + 1}
+                                            </span>
+                                            <span
+                                                className={`flex size-10 items-center justify-center rounded-full text-sm font-bold ${colorByText(row.member, avatarColors)}`}
+                                            >
+                                                {initial(row.member)}
+                                            </span>
+                                            <div>
+                                                <p className="text-navy-700 text-sm font-semibold">
+                                                    {row.member}
+                                                </p>
+                                                <p className="text-xs text-gray-400">
+                                                    @{row.username}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <span className="text-sm font-bold text-violet-600">
+                                            {formatRupiah(row.nominal)}
+                                        </span>
+                                    </div>
+                                ))
+                            )}
+
+                            {Array.from({ length: 3 }).map((_, index) => (
+                                <div
+                                    key={`skeleton-${index}`}
+                                    aria-hidden
+                                    className="pointer-events-none flex items-center justify-between gap-3 opacity-0"
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <span className="size-8 rounded-full bg-gray-100" />
+                                        <span className="size-10 rounded-full bg-gray-100" />
+                                        <div className="space-y-2">
+                                            <span className="block h-3 w-28 rounded bg-gray-100" />
+                                            <span className="block h-2 w-16 rounded bg-gray-100" />
+                                        </div>
+                                    </div>
+                                    <span className="h-3 w-16 rounded bg-gray-100" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                {canManage && (
+                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)]">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 className="text-navy-700 text-lg font-bold">
+                                    Mutasi Kas
+                                </h3>
+                                <p className="mt-1 text-sm text-gray-500">
+                                    Uang masuk dan keluar terbaru.
+                                </p>
+                            </div>
+                            <Link
+                                href={kasIndex()}
+                                className="rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600"
+                            >
+                                Kas RT
+                            </Link>
+                        </div>
+
+                        <div className="mt-5 overflow-x-auto">
+                            <table className="w-full min-w-[640px] text-left text-sm">
+                                <thead>
+                                    <tr className="text-horizon-gray border-b border-gray-100">
+                                        <th className="pb-3 font-medium">
+                                            Jenis
+                                        </th>
+                                        <th className="pb-3 font-medium">
+                                            Kategori
+                                        </th>
+                                        <th className="pb-3 font-medium">
+                                            Tanggal
+                                        </th>
+                                        <th className="pb-3 text-right font-medium">
+                                            Nominal
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     {mutasi.length === 0 ? (
-                                        <p className="text-horizon-gray text-sm">
-                                            Belum ada mutasi kas.
-                                        </p>
+                                        <tr>
+                                            <td
+                                                colSpan={4}
+                                                className="text-horizon-gray py-8 text-center"
+                                            >
+                                                Belum ada mutasi kas.
+                                            </td>
+                                        </tr>
                                     ) : (
                                         mutasi.map((row) => (
-                                            <div
+                                            <tr
                                                 key={row.id}
-                                                className="flex items-center justify-between gap-3 border-b border-gray-50 pb-3 last:border-0 last:pb-0"
+                                                className="text-navy-700 border-b border-gray-50 last:border-0"
                                             >
-                                                <div>
-                                                    <p className="text-navy-700 text-sm font-semibold">
-                                                        {row.kategori_label}
-                                                    </p>
-                                                    <p className="text-horizon-gray text-xs">
-                                                        {row.tanggal_label} ·{' '}
-                                                        {row.jenis_label}
-                                                    </p>
-                                                </div>
-                                                <span
-                                                    className={`text-sm font-semibold ${
+                                                <td className="py-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <span
+                                                            className={`flex size-10 items-center justify-center rounded-full ${
+                                                                row.jenis ===
+                                                                'masuk'
+                                                                    ? 'bg-emerald-50 text-emerald-600'
+                                                                    : 'bg-rose-50 text-rose-500'
+                                                            }`}
+                                                        >
+                                                            {row.jenis ===
+                                                            'masuk' ? (
+                                                                <ArrowDownLeft className="size-4" />
+                                                            ) : (
+                                                                <ArrowUpRight className="size-4" />
+                                                            )}
+                                                        </span>
+                                                        <span className="font-semibold">
+                                                            {row.jenis_label}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-3">
+                                                    {row.kategori_label}
+                                                </td>
+                                                <td className="py-3 text-gray-500">
+                                                    {row.tanggal_label ?? '-'}
+                                                </td>
+                                                <td
+                                                    className={`py-3 text-right font-bold ${
                                                         row.jenis === 'masuk'
-                                                            ? 'text-emerald-700'
-                                                            : 'text-red-600'
+                                                            ? 'text-emerald-600'
+                                                            : 'text-rose-500'
                                                     }`}
                                                 >
                                                     {row.jenis === 'masuk'
                                                         ? '+'
                                                         : '-'}
                                                     {formatRupiah(row.nominal)}
-                                                </span>
-                                            </div>
+                                                </td>
+                                            </tr>
                                         ))
                                     )}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <h3 className="text-navy-700 text-lg font-bold">
-                                    Iuran Saya
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    Menu yang bisa kamu buka. Data iuran hanya
-                                    milikmu.
-                                </p>
-                                <Button
-                                    asChild
-                                    className="bg-brand-500 hover:bg-brand-600 mt-5"
-                                >
-                                    <Link href={iuranIndex()}>
-                                        Buka Iuran Saya
-                                    </Link>
-                                </Button>
-                            </>
-                        )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <Link
+                            href={kasIndex()}
+                            className="mt-5 inline-flex text-sm font-semibold text-sky-600"
+                        >
+                            Buka buku kas →
+                        </Link>
                     </div>
-                </div>
+                )}
             </div>
         </>
     );
