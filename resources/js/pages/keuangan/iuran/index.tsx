@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import RupiahInput from '@/components/rupiah-input';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -537,17 +538,14 @@ export default function IuranIndex({
 
                                     <div className="grid gap-2">
                                         <Label htmlFor="nominal">Nominal</Label>
-                                        <Input
+                                        <RupiahInput
                                             id="nominal"
                                             name="nominal"
-                                            type="number"
-                                            min="0"
-                                            step="1000"
                                             required
                                             defaultValue={
                                                 editing?.nominal ?? ''
                                             }
-                                            placeholder="50000"
+                                            placeholder="0"
                                         />
                                         <InputError message={errors.nominal} />
                                     </div>
