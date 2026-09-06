@@ -20,6 +20,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import { dashboard } from '@/routes';
 import { laporan as laporanKeuangan } from '@/routes/keuangan';
 import { index as iuranIndex } from '@/routes/keuangan/iuran';
@@ -50,6 +51,7 @@ const manajemenNavGroup: NavGroup = {
 export function AppSidebar() {
     const { auth } = usePage().props;
     const manage = auth.user ? canManage(auth.user.role) : false;
+    const closeMobileNav = useMobileNavigation();
 
     const groups: NavGroup[] = [
         {
@@ -102,7 +104,10 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={dashboard()}>
+                            <Link
+                                href={dashboard()}
+                                onClick={closeMobileNav}
+                            >
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

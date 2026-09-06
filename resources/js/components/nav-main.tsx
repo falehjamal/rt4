@@ -5,12 +5,16 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    useSidebar,
 } from '@/components/ui/sidebar';
 import { useCurrentUrl } from '@/hooks/use-current-url';
+import { useMobileNavigation } from '@/hooks/use-mobile-navigation';
 import type { NavGroup } from '@/types';
 
 export function NavMain({ groups }: { groups: NavGroup[] }) {
     const { isCurrentUrl } = useCurrentUrl();
+    const { isMobile } = useSidebar();
+    const closeMobileNav = useMobileNavigation();
 
     return (
         <>
@@ -32,9 +36,13 @@ export function NavMain({ groups }: { groups: NavGroup[] }) {
                                     <SidebarMenuButton
                                         asChild
                                         isActive={active}
+                                        size={isMobile ? 'lg' : 'default'}
                                         tooltip={{ children: item.title }}
                                     >
-                                        <Link href={item.href}>
+                                        <Link
+                                            href={item.href}
+                                            onClick={closeMobileNav}
+                                        >
                                             {item.icon && <item.icon />}
                                             <span>{item.title}</span>
                                         </Link>
