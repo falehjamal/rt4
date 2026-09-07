@@ -135,8 +135,8 @@ export default function AuditLogIndex({
                                 Audit Log
                             </h1>
                             <p className="mt-1 text-sm text-gray-500">
-                                Jejak lengkap aktivitas user: siapa, kapan, apa
-                                yang berubah, IP, perangkat, dan browser.
+                                Jejak lengkap aktivitas user: siapa, kapan (WIB),
+                                apa yang berubah, IP, dan nama perangkat.
                             </p>
                         </div>
 
@@ -336,7 +336,10 @@ export default function AuditLogIndex({
                                                 {row.ip_address ?? '-'}
                                             </td>
                                             <td className="py-3">
-                                                {row.device ?? '-'}
+                                                <div>{row.device ?? '-'}</div>
+                                                <div className="text-horizon-gray text-xs">
+                                                    {row.platform ?? ''}
+                                                </div>
                                             </td>
                                             <td className="py-3">
                                                 {row.browser ?? '-'}
@@ -456,9 +459,13 @@ export default function AuditLogIndex({
                                         Perangkat
                                     </dt>
                                     <dd className="text-navy-700">
-                                        {detail.device ?? '-'} ·{' '}
-                                        {detail.platform ?? '-'} ·{' '}
-                                        {detail.browser ?? '-'}
+                                        {detail.device ?? '-'}
+                                        {detail.platform
+                                            ? ` · ${detail.platform}`
+                                            : ''}
+                                        {detail.browser
+                                            ? ` · ${detail.browser}`
+                                            : ''}
                                     </dd>
                                 </div>
                                 <div>

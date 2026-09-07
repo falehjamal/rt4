@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\AuditAction;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Support\ClientIp;
 use App\Support\UserAgentParser;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -39,7 +40,7 @@ class AuditLogger
         $request = request();
         $actor ??= ($request instanceof Request ? $request->user() : null) ?? auth()->user();
         $userAgent = $request instanceof Request ? $request->userAgent() : null;
-        $parsed = UserAgentParser::parse($userAgent);
+        $parsed = UserAgentParser::parse($userAgent, $request instanceof Request ? $request : null);
 
         AuditLog::query()->create([
             'user_id' => $actor?->id,
@@ -53,7 +54,7 @@ class AuditLogger
             'description' => $description ?? $this->description($action, $actor, $subject),
             'old_values' => $oldValues,
             'new_values' => $newValues,
-            'ip_address' => $request instanceof Request ? $request->ip() : null,
+            'ip_address' => ClientIp::from($request instanceof Request ? $request : null),
             'user_agent' => $userAgent,
             'device' => $parsed['device'],
             'browser' => $parsed['browser'],

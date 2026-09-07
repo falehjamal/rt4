@@ -33,8 +33,8 @@ class AuditLogController extends Controller
         $search = $request->string('search')->trim()->toString();
         $action = $request->string('action')->toString();
         $userId = $request->integer('user_id');
-        $dari = $request->date('dari')?->startOfDay();
-        $sampai = $request->date('sampai')?->endOfDay();
+        $dari = $request->date('dari', tz: 'Asia/Jakarta')?->startOfDay();
+        $sampai = $request->date('sampai', tz: 'Asia/Jakarta')?->endOfDay();
         $sort = $request->string('sort')->toString();
         $direction = $request->string('direction')->toString() === 'asc' ? 'asc' : 'desc';
 
@@ -84,8 +84,10 @@ class AuditLogController extends Controller
                 'platform' => $log->platform,
                 'url' => $log->url,
                 'method' => $log->method,
-                'created_at' => $log->created_at?->format('d M Y H:i:s'),
-                'created_at_iso' => $log->created_at?->toIso8601String(),
+                'created_at' => $log->created_at === null
+                    ? null
+                    : $log->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y H:i:s').' WIB',
+                'created_at_iso' => $log->created_at?->timezone('Asia/Jakarta')->toIso8601String(),
             ]);
 
         return Inertia::render('manajemen/audit/index', [
