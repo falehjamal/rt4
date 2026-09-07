@@ -56,42 +56,29 @@ class DashboardController extends Controller
             ]);
         }
 
-        $iuranSaya = Iuran::query()->where('user_id', $user->id);
-        $iuranBulanIni = (clone $iuranSaya)
-            ->whereBetween('tanggal_iuran', [$awalBulan, $akhirBulan])
-            ->sum('nominal');
-        $terakhir = Iuran::query()
-            ->where('user_id', $user->id)
-            ->orderByDesc('tanggal_iuran')
-            ->orderByDesc('id')
-            ->first();
-
         return Inertia::render('dashboard', [
             'canManage' => false,
             'stats' => [
                 [
                     'key' => 'total',
                     'title' => 'Total iuran kamu',
-                    'value' => (string) (clone $iuranSaya)->sum('nominal'),
+                    'value' => (string) Iuran::query()->where('user_id', $user->id)->sum('nominal'),
                 ],
                 [
-                    'key' => 'bulan',
-                    'title' => 'Iuran bulan ini',
-                    'value' => (string) $iuranBulanIni,
+                    'key' => 'semua',
+                    'title' => 'Total iuran semua member',
+                    'value' => (string) Iuran::query()
+                        ->whereHas('user', fn ($query) => $query->members())
+                        ->sum('nominal'),
                 ],
                 [
-                    'key' => 'jumlah',
-                    'title' => 'Jumlah setoran',
-                    'value' => (string) (clone $iuranSaya)->count(),
-                ],
-                [
-                    'key' => 'terakhir',
-                    'title' => 'Setoran terakhir',
-                    'value' => $terakhir?->tanggal_iuran?->format('d M Y') ?? '-',
+                    'key' => 'saldo',
+                    'title' => 'Saldo kas RT',
+                    'value' => Kas::saldo(),
                 ],
             ],
-            'iurans' => $this->recentIurans($user->id),
-            'iuranTerbanyak' => $this->topIurans($user->id),
+            'iurans' => [],
+            'iuranTerbanyak' => $this->topIurans(),
             'mutasi' => [],
         ]);
     }

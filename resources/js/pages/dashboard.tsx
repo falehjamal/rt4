@@ -2,9 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import {
     ArrowDownLeft,
     ArrowUpRight,
-    CalendarDays,
     Landmark,
-    ListChecks,
     Users,
     Wallet,
 } from 'lucide-react';
@@ -67,6 +65,13 @@ const statThemes: Record<
         caption: () => 'Semua setoran kamu',
         format: formatRupiah,
     },
+    semua: {
+        icon: Users,
+        iconWrap: 'bg-sky-50',
+        iconColor: 'text-sky-500',
+        caption: () => 'Akumulasi setoran seluruh member',
+        format: formatRupiah,
+    },
     saldo: {
         icon: Landmark,
         iconWrap: 'bg-emerald-50',
@@ -81,27 +86,6 @@ const statThemes: Record<
         iconColor: 'text-rose-500',
         caption: () => 'Pengeluaran bulan ini',
         format: formatRupiah,
-    },
-    bulan: {
-        icon: CalendarDays,
-        iconWrap: 'bg-violet-50',
-        iconColor: 'text-violet-500',
-        caption: () => 'Setoran kamu bulan ini',
-        format: formatRupiah,
-    },
-    jumlah: {
-        icon: ListChecks,
-        iconWrap: 'bg-sky-50',
-        iconColor: 'text-sky-500',
-        caption: () => 'Total transaksi iuran',
-        format: (value) => `${value} setoran`,
-    },
-    terakhir: {
-        icon: CalendarDays,
-        iconWrap: 'bg-amber-50',
-        iconColor: 'text-amber-500',
-        caption: () => 'Tanggal setoran terakhir',
-        format: (value) => value,
     },
 };
 
@@ -183,7 +167,9 @@ export default function Dashboard({
             <Head title="Dashboard" />
 
             <div className="flex flex-1 flex-col gap-5 p-4">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+                <div
+                    className={`grid grid-cols-1 gap-5 md:grid-cols-2 ${canManage ? 'xl:grid-cols-4' : 'xl:grid-cols-3'}`}
+                >
                     {stats.map((stat) => {
                         const theme = statThemes[stat.key] ?? statThemes.iuran;
                         const Icon = theme.icon;
@@ -221,66 +207,66 @@ export default function Dashboard({
                     })}
                 </div>
 
-                <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
-                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] lg:col-span-3">
-                        <div className="flex items-start justify-between gap-3">
-                            <div>
-                                <h3 className="text-navy-700 text-lg font-bold">
-                                    {canManage
-                                        ? 'Iuran Terbaru'
-                                        : 'Iuran kamu'}
-                                </h3>
-                                <p className="mt-1 text-sm text-gray-500">
-                                    {canManage
-                                        ? 'Setoran member yang baru tercatat.'
-                                        : 'Riwayat setoran iuran milikmu.'}
-                                </p>
+                <div
+                    className={
+                        canManage
+                            ? 'grid grid-cols-1 gap-5 lg:grid-cols-5'
+                            : undefined
+                    }
+                >
+                    {canManage && (
+                        <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] lg:col-span-3">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <h3 className="text-navy-700 text-lg font-bold">
+                                        Iuran Terbaru
+                                    </h3>
+                                    <p className="mt-1 text-sm text-gray-500">
+                                        Setoran member yang baru tercatat.
+                                    </p>
+                                </div>
+                                <Link
+                                    href={iuranIndex()}
+                                    className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-600"
+                                >
+                                    Iuran Member
+                                </Link>
                             </div>
-                            <Link
-                                href={iuranIndex()}
-                                className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-600"
-                            >
-                                {canManage ? 'Iuran Member' : 'Iuran Saya'}
-                            </Link>
-                        </div>
 
-                        <div className="mt-5 overflow-x-auto">
-                            <table className="w-full min-w-[520px] text-left text-sm">
-                                <thead>
-                                    <tr className="text-horizon-gray border-b border-gray-100">
-                                        {canManage && (
+                            <div className="mt-5 overflow-x-auto">
+                                <table className="w-full min-w-[520px] text-left text-sm">
+                                    <thead>
+                                        <tr className="text-horizon-gray border-b border-gray-100">
                                             <th className="pb-3 font-medium">
                                                 Member
                                             </th>
-                                        )}
-                                        <th className="pb-3 font-medium">
-                                            Nominal
-                                        </th>
-                                        <th className="pb-3 font-medium">
-                                            Tanggal
-                                        </th>
-                                        <th className="pb-3 font-medium">
-                                            Keterangan
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {iurans.length === 0 ? (
-                                        <tr>
-                                            <td
-                                                colSpan={canManage ? 4 : 3}
-                                                className="text-horizon-gray py-8 text-center"
-                                            >
-                                                Belum ada iuran.
-                                            </td>
+                                            <th className="pb-3 font-medium">
+                                                Nominal
+                                            </th>
+                                            <th className="pb-3 font-medium">
+                                                Tanggal
+                                            </th>
+                                            <th className="pb-3 font-medium">
+                                                Keterangan
+                                            </th>
                                         </tr>
-                                    ) : (
-                                        iurans.map((row) => (
-                                            <tr
-                                                key={row.id}
-                                                className="text-navy-700 border-b border-gray-50 last:border-0"
-                                            >
-                                                {canManage && (
+                                    </thead>
+                                    <tbody>
+                                        {iurans.length === 0 ? (
+                                            <tr>
+                                                <td
+                                                    colSpan={4}
+                                                    className="text-horizon-gray py-8 text-center"
+                                                >
+                                                    Belum ada iuran.
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            iurans.map((row) => (
+                                                <tr
+                                                    key={row.id}
+                                                    className="text-navy-700 border-b border-gray-50 last:border-0"
+                                                >
                                                     <td className="py-3">
                                                         <div className="flex items-center gap-3">
                                                             <span
@@ -305,59 +291,71 @@ export default function Dashboard({
                                                             </div>
                                                         </div>
                                                     </td>
-                                                )}
-                                                <td className="py-3 font-semibold text-sky-600">
-                                                    {formatRupiah(row.nominal)}
-                                                </td>
-                                                <td className="py-3 text-gray-500">
-                                                    {row.tanggal_label ?? '-'}
-                                                </td>
-                                                <td className="py-3">
-                                                    {row.keterangan ? (
-                                                        <span
-                                                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${colorByText(row.keterangan, badgeColors)}`}
-                                                        >
-                                                            {row.keterangan}
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-gray-400">
-                                                            -
-                                                        </span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
-                                    )}
-                                </tbody>
-                            </table>
+                                                    <td className="py-3 font-semibold text-sky-600">
+                                                        {formatRupiah(
+                                                            row.nominal,
+                                                        )}
+                                                    </td>
+                                                    <td className="py-3 text-gray-500">
+                                                        {row.tanggal_label ??
+                                                            '-'}
+                                                    </td>
+                                                    <td className="py-3">
+                                                        {row.keterangan ? (
+                                                            <span
+                                                                className={`rounded-full px-2.5 py-1 text-xs font-medium ${colorByText(row.keterangan, badgeColors)}`}
+                                                            >
+                                                                {row.keterangan}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-gray-400">
+                                                                -
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <Link
+                                href={iuranIndex()}
+                                className="mt-5 inline-flex text-sm font-semibold text-sky-600"
+                            >
+                                Lihat seluruh riwayat →
+                            </Link>
                         </div>
+                    )}
 
-                        <Link
-                            href={iuranIndex()}
-                            className="mt-5 inline-flex text-sm font-semibold text-sky-600"
-                        >
-                            Lihat seluruh riwayat →
-                        </Link>
-                    </div>
-
-                    <div className="rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] lg:col-span-2">
+                    <div
+                        className={`rounded-[20px] bg-white p-6 shadow-[14px_17px_40px_4px_rgba(112,144,176,0.08)] ${canManage ? 'lg:col-span-2' : ''}`}
+                    >
                         <div className="flex items-start justify-between gap-3">
                             <div>
                                 <h3 className="text-navy-700 text-lg font-bold">
                                     5 Iuran Terbanyak
                                 </h3>
                                 <p className="mt-1 text-sm text-gray-500">
-                                    {canManage
-                                        ? 'Member dengan total setoran tertinggi.'
-                                        : 'Setoran kamu dengan nominal terbesar.'}
+                                    Member dengan total setoran tertinggi.
                                 </p>
                             </div>
-                            <Link
-                                href={iuranIndex()}
-                                className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-600"
-                            >
-                                Ranking
-                            </Link>
+                            {canManage ? (
+                                <Link
+                                    href={iuranIndex()}
+                                    className="rounded-full bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-600"
+                                >
+                                    Ranking
+                                </Link>
+                            ) : (
+                                <Link
+                                    href={iuranIndex()}
+                                    className="rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-600"
+                                >
+                                    Iuran Saya
+                                </Link>
+                            )}
                         </div>
 
                         <div className="mt-5 space-y-4">
@@ -398,23 +396,24 @@ export default function Dashboard({
                                 ))
                             )}
 
-                            {Array.from({ length: 3 }).map((_, index) => (
-                                <div
-                                    key={`skeleton-${index}`}
-                                    aria-hidden
-                                    className="pointer-events-none flex items-center justify-between gap-3 opacity-0"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className="size-8 rounded-full bg-gray-100" />
-                                        <span className="size-10 rounded-full bg-gray-100" />
-                                        <div className="space-y-2">
-                                            <span className="block h-3 w-28 rounded bg-gray-100" />
-                                            <span className="block h-2 w-16 rounded bg-gray-100" />
+                            {canManage &&
+                                Array.from({ length: 3 }).map((_, index) => (
+                                    <div
+                                        key={`skeleton-${index}`}
+                                        aria-hidden
+                                        className="pointer-events-none flex items-center justify-between gap-3 opacity-0"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <span className="size-8 rounded-full bg-gray-100" />
+                                            <span className="size-10 rounded-full bg-gray-100" />
+                                            <div className="space-y-2">
+                                                <span className="block h-3 w-28 rounded bg-gray-100" />
+                                                <span className="block h-2 w-16 rounded bg-gray-100" />
+                                            </div>
                                         </div>
+                                        <span className="h-3 w-16 rounded bg-gray-100" />
                                     </div>
-                                    <span className="h-3 w-16 rounded bg-gray-100" />
-                                </div>
-                            ))}
+                                ))}
                         </div>
                     </div>
                 </div>
